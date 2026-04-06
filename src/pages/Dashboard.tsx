@@ -349,9 +349,9 @@ export default function Dashboard({ userRole }: { userRole?: string | null }) {
         fetchAllRows('stocks', 'kode_material,wip_lt_pcs,wip_st_pcs,fg_st_pcs,fg_lt_pcs,wip_lt_kg,wip_st_kg,fg_st_kg,fg_lt_kg,pasm,grade,created_at,jenis_stock,lokasi_gudang,unfifo').catch(() => []),
         fetchAllRows('p3_data', 'customer,kode_st,qty_p3_pcs,qty_p3_kg,tanggal_delivery').catch(() => []),
         fetchAllRows('min_max_stock', 'kode_st,kode_lt,min_stock,max_stock,jenis').catch(() => []),
-        fetchAllRows('sales_orders', 'customer,kode_st,qty_order_pcs,qty_order_kg,sisa_order_pcs,sisa_order_kg', (q) => q.eq('periode', targetPeriode)).catch(() => []),
-        fetchAllRows('forecasts', 'customer,kode_st,qty_forecast_pcs,qty_forecast_kg', (q) => q.eq('periode', targetPeriode)).catch(() => []),
-        fetchAllRows('loo_data', 'customer,kode_st,sisa_loo_pcs,sisa_loo_kg', (q) => q.eq('periode', targetPeriode)).catch(() => []),
+        fetchAllRows('sales_orders', 'customer,kode_st,qty_order_pcs,qty_order_kg', (q) => q.eq('periode', targetPeriode)).catch(() => []),
+        fetchAllRows('forecasts', 'customer,kode_st,qty_pcs,qty_forecast_kg', (q) => q.eq('periode', targetPeriode)).catch(() => []),
+        fetchAllRows('loo_data', 'customer,kode_st,sisa_loo_pcs,sisa_loo_kg,sisa_order_pcs,sisa_order_kg').catch(() => []),
         fetchAllRows('report_view_mat', '*').catch(() => [])
       ]);
 
@@ -479,7 +479,7 @@ export default function Dashboard({ userRole }: { userRole?: string | null }) {
               d.sisa_order_pcs += Number(r.sisa_order_pcs) || 0;
               d.sisa_order_kg += Number(r.sisa_order_kg) || 0;
             } else if (prefix === 'fc') {
-              d.forecast_pcs += Number(r.qty_forecast_pcs) || 0;
+              d.forecast_pcs += Number(r.qty_pcs) || 0;
               d.forecast_kg += Number(r.qty_forecast_kg) || 0;
             } else if (prefix === 'loo') {
               d.loo_pcs += Number(r.sisa_loo_pcs) || 0;
