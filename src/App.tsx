@@ -125,14 +125,28 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        fetchUserRole(session.user.id);
+    const checkSession = async () => {
+      console.log('Checking session...', { isSupabaseConfigured });
+      if (!isSupabaseConfigured) {
+        console.warn('Supabase not configured, skipping session check');
+        setIsAuthLoading(false);
+        return;
       }
-      setIsAuthLoading(false);
-    });
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        console.log('Session fetched:', session);
+        setSession(session);
+        if (session?.user) {
+          await fetchUserRole(session.user.id);
+        }
+      } catch (err) {
+        console.error('Session check failed:', err);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+    checkSession();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
