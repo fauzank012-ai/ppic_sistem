@@ -1,0 +1,5 @@
+{
+  "name": "Order & Stock Monitoring",
+  "description": "A full-stack application to monitor orders and stock with import/export capabilities.",
+  "requestFramePermissions": []
+}
