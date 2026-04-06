@@ -58,19 +58,19 @@ export default function Planning() {
   
   const { data: sos = [], isLoading: sosLoading } = useQuery({
     queryKey: ['sales_orders', 'all'],
-    queryFn: () => fetchAllRows('sales_orders', 'customer,kode_st,qty_order_pcs,qty_order_kg,periode'),
+    queryFn: () => fetchAllRows('sales_orders', 'customer,kode_st,qty_order_kg,periode').catch(() => fetchAllRows('sales_orders', 'customer,kode_st,qty_order_kg')),
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: looData = [], isLoading: looLoading } = useQuery({
     queryKey: ['loo_data', 'all'],
-    queryFn: () => fetchAllRows('loo_data', 'customer,kode_st,sisa_loo_kg,sisa_order_kg,periode').catch(() => fetchAllRows('loo_data', 'customer,kode_st,sisa_loo_kg,sisa_order_kg')),
+    queryFn: () => fetchAllRows('loo_data', 'customer,kode_st,sisa_loo_kg,sisa_order_kg').catch(() => fetchAllRows('loo_data', 'customer,kode_st,sisa_loo_kg,sisa_order_kg')),
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: forecasts = [], isLoading: forecastsLoading } = useQuery({
     queryKey: ['forecasts'],
-    queryFn: () => fetchAllRows('forecasts', 'customer,kode_st,qty_pcs,qty_forecast_kg,periode'),
+    queryFn: () => fetchAllRows('forecasts', 'customer,kode_st,qty_forecast_kg,periode').catch(() => fetchAllRows('forecasts', 'customer,kode_st,qty_forecast_kg')),
     staleTime: 5 * 60 * 1000,
   });
 

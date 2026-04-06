@@ -56,8 +56,8 @@ export default function OrderMonitor() {
     setLoading(true);
     try {
       const [fData, soData, dData, mData] = await Promise.all([
-        fetchAllRows('forecasts', 'customer,kode_st,qty_pcs,qty_forecast_kg'),
-        fetchAllRows('sales_orders', 'customer,kode_st,qty_order_pcs,qty_order_kg'),
+        fetchAllRows('forecasts', 'customer,kode_st,qty_forecast_kg').catch(() => fetchAllRows('forecasts', 'customer,kode_st,qty_forecast_kg')),
+        fetchAllRows('sales_orders', 'customer,kode_st,qty_order_kg').catch(() => fetchAllRows('sales_orders', 'customer,kode_st,qty_order_kg')),
         fetchAllRows('deliveries', 'customer,kode_st,qty_delivery_pcs,qty_delivery_kg'),
         fetchAllRows('material_master', 'customer,short_name_customer,kode_st,kode_lt,berat_per_pcs,dimensi,alternative_kodes_st,alternative_kodes_lt')
       ]);
