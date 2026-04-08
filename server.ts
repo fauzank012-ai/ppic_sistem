@@ -97,8 +97,10 @@ app.use('/api', (req, res, next) => {
 
 app.post('/api/refresh', async (req, res) => {
   try {
-    const { error } = await supabase.rpc('refresh_report_view');
-    if (error) throw error;
+    // report_view_mat is now a regular view, so we don't need to refresh it via RPC.
+    // We just clear the cache.
+    // const { error } = await supabase.rpc('refresh_report_view');
+    // if (error && !error.message.includes('Could not find the function')) throw error;
     
     // Clear cache on refresh
     cache.flushAll();

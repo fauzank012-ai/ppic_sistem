@@ -1,10 +1,7 @@
--- Fix for "wip_st_kg", "fg_kg", "fg_lt_pcs", and "fg_lt_kg" calculation
--- This script updates the report_view_mat VIEW to take these values directly from the stocks table.
-
--- 1. Drop existing view
+-- Drop the existing view
 DROP VIEW IF EXISTS public.report_view_mat CASCADE;
 
--- 2. Recreate the VIEW
+-- Recreate the view with mapped stock codes
 CREATE OR REPLACE VIEW public.report_view_mat AS
 WITH 
 combinations AS (
@@ -29,23 +26,19 @@ forecast_agg AS (
     FROM public.forecasts
     GROUP BY normalized_customer, normalized_kode_st, CAST(periode AS TEXT)
 ),
--- Fix: Map stock codes using material_codes_expanded (deduplicated to prevent inflating sums)
-unique_material_mapping AS (
-    SELECT DISTINCT ON (normalized_code) normalized_code, canonical_kode_st
-    FROM public.material_codes_expanded
-),
+-- Fix: Map stock codes using material_codes_expanded
 mapped_stocks AS (
     SELECT 
         s.*,
         COALESCE(m.canonical_kode_st, s.normalized_kode_material) as mapped_kode_st
     FROM public.stocks s
-    LEFT JOIN unique_material_mapping m ON 
+    LEFT JOIN public.material_codes_expanded m ON 
         s.normalized_kode_material = m.normalized_code
     WHERE s.created_at = (SELECT MAX(created_at) FROM public.stocks)
 ),
 stock_agg AS (
     SELECT 
-        lower(regexp_replace(mapped_kode_st, '\s+', '', 'g')) as normalized_kode_st, 
+        mapped_kode_st as normalized_kode_st, 
         SUM(wip_lt_pcs) as wip_lt_pcs, 
         SUM(wip_st_pcs) as wip_st_pcs, 
         SUM(wip_st_kg) as wip_st_kg,
@@ -54,7 +47,7 @@ stock_agg AS (
         SUM(fg_lt_pcs) as fg_lt_pcs,
         SUM(fg_lt_kg) as fg_lt_kg
     FROM mapped_stocks
-    GROUP BY lower(regexp_replace(mapped_kode_st, '\s+', '', 'g'))
+    GROUP BY mapped_kode_st
 ),
 -- Calculate 3-month rolling average
 three_month_delivery_agg AS (
@@ -113,14 +106,4 @@ base_report AS (
     LEFT JOIN three_month_delivery_agg t ON m.normalized_customer = t.normalized_customer AND m.normalized_kode_st = t.normalized_kode_st
     LEFT JOIN delivery_agg_period dp ON m.normalized_customer = dp.normalized_customer AND m.normalized_kode_st = dp.normalized_kode_st AND c.periode = dp.periode
 )
-SELECT 
-    *,
-    CASE 
-        WHEN EXTRACT(DAY FROM CURRENT_DATE) <= 15 THEN
-            CASE 
-                WHEN forecast_pcs > order_pcs THEN (loo_kg + sisa_order_kg + (forecast_kg - order_kg))
-                ELSE (loo_kg + sisa_order_kg)
-            END
-        ELSE (loo_kg + sisa_order_kg)
-    END as n_c_st
-FROM base_report;
+SELECT * FROM base_report;

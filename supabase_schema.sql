@@ -28,7 +28,7 @@ CREATE TABLE public.material_master (
     normalized_kode_lt VARCHAR(255) GENERATED ALWAYS AS (lower(regexp_replace(kode_lt, '\s+', '', 'g'))) STORED,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(kode_st)
+    UNIQUE(kode_st, customer)
 );
 
 -- 2. Table SO
